@@ -1,6 +1,7 @@
 ## From Matplotlib Gallery: https://matplotlib.org/gallery/user_interfaces/embedding_in_wx5_sgskip.html
 
 import wx
+import wx.lib.scrolledpanel
 import wx.lib.agw.aui as aui
 import wx.lib.mixins.inspection as wit
 
@@ -17,9 +18,22 @@ class Plot(wx.Panel):
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.toolbar = NavigationToolbar(self.canvas)
         self.toolbar.Realize()
-
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.canvas, 1, wx.EXPAND)
+        btn = wx.Button(self, -1, "Toggle curve")
+        sizer.Add(btn, 0, wx.EXPAND)
+        screenSize = wx.DisplaySize()
+        screenWidth, screenHeight = screenSize
+        text_panel = wx.lib.scrolledpanel.ScrolledPanel(self, -1, size=(screenWidth, 100), style=wx.SIMPLE_BORDER)
+        text_panel.SetupScrolling()
+        text_sizer = wx.BoxSizer(wx.VERTICAL)
+        text_panel.SetSizer(text_sizer)
+        def when_clicked(ev):
+          print(ev)
+          text_sizer.Add(wx.StaticText(text_panel, label="coucou"), 1)
+          text_sizer.Fit(text_panel)
+        btn.Bind(wx.EVT_BUTTON, when_clicked)
+        sizer.Add(text_panel, 1, wx.LEFT | wx.EXPAND)
         sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
         self.SetSizer(sizer)
 
