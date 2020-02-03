@@ -5,6 +5,7 @@ import wx.lib.agw.aui as aui
 import wx.lib.mixins.inspection as wit
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg as NavigationToolbar
 
@@ -36,7 +37,6 @@ class PlotNotebook(wx.Panel):
         self.nb.AddPage(page, name)
         return page.figure
 
-
 def demo():
     # alternatively you could use
     #app = wx.App()
@@ -45,8 +45,20 @@ def demo():
     app = wit.InspectableApp()
     frame = wx.Frame(None, -1, 'Plotter')
     plotter = PlotNotebook(frame)
-    axes1 = plotter.add('figure 1').gca()
-    axes1.plot([1, 2, 3], [2, 1, 4])
+    fig1 = plotter.add('figure 1')
+    axes1 = fig1.gca()
+    l1, = axes1.plot([1, 2, 3], [2, 1, 4])
+
+    def toggle_line(event):
+      l1.set_visible(not l1.get_visible())
+      fig1.canvas.draw() ## important for refreshing the display
+
+
+    ## From https: // matplotlib.org / users / event_handling.html
+    cid = fig1.canvas.mpl_connect('button_press_event', toggle_line) ## cid is an integer
+    print("cid: " + str(cid))
+
+
     axes2 = plotter.add('figure 2').gca()
     axes2.plot([1, 2, 3, 4, 5], [2, 1, 4, 2, 3])
     frame.Show()
