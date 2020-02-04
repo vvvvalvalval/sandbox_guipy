@@ -17,6 +17,7 @@ import numpy as np
 import kernel_utils as ku
 
 import pandas as pd
+import scipy.io
 
 class HelloFrame(wx.Frame):
     """
@@ -144,6 +145,13 @@ def export_observed_data_csv(file, observed_data):
   df.to_csv(file, index=False, sep=",")
 
 
+def export_data_matlab(file, observed_data, xs, prediction_means):
+  observed_x, observed_y = observed_data
+  scipy.io.savemat(file, {'observed_x': observed_x,
+                          'observed_y': observed_y,
+                          'predicted_x': xs,
+                          'predicted_y_mean': prediction_means})
+
 class GpPlot(wx.Panel):
   def __init__(self, parent, gp_state, id=-1, dpi=None, **kwargs):
     wx.Panel.__init__(self, parent, id=id, **kwargs)
@@ -156,9 +164,9 @@ class GpPlot(wx.Panel):
     sizer = wx.BoxSizer(wx.VERTICAL)
     sizer.Add(self.canvas, 1, wx.EXPAND)
 
-    export_btn = wx.Button(self, -1, label="Export observed data as CSV")
+    export_matlab_btn = wx.Button(self, -1, label="Export observed data as CSV")
 
-    def export(ev):
+    def export_csv(ev):
       with wx.FileDialog(self, "Save CSV file", wildcard="CSV files (*.csv)|*.csv",
                          style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
 
@@ -172,8 +180,23 @@ class GpPlot(wx.Panel):
             export_observed_data_csv(file, self.gp_state.observed_data)
         except IOError:
           wx.LogError("Cannot save current data in file '%s'." % pathname)
-    export_btn.Bind(wx.EVT_BUTTON, export)
-    sizer.Add(export_btn)
+    export_matlab_btn.Bind(wx.EVT_BUTTON, export_csv)
+    sizer.Add(export_matlab_btn)
+
+    export_matlab_btn = wx.Button(self, -1, label="Export as Matlab file")
+    def export_matlab(ev):
+      with wx.FileDialog(self, "Save Matlab file",
+                         style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
+
+        if fileDialog.ShowModal() == wx.ID_CANCEL:
+          return  # the user changed their mind
+
+        # save the current contents in the file
+        pathname = fileDialog.GetPath()
+        export_data_matlab(pathname, self.gp_state.observed_data, self.xs, self.predicted_means)
+
+    export_matlab_btn.Bind(wx.EVT_BUTTON, export_matlab)
+    sizer.Add(export_matlab_btn)
 
     clear_button = wx.Button(self, -1, label="Reset")
     def reset(ev):
@@ -196,6 +219,8 @@ class GpPlot(wx.Panel):
     observed_data = self.gp_state.observed_data
     fig = self.figure
     xs, predicted_means = predictions(observed_data)
+    self.xs = xs
+    self.predicted_means = predicted_means
     ax = fig.gca()
     ax.clear()
     observed_xs, observed_y = observed_data
