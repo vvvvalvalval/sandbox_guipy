@@ -30,8 +30,8 @@ class Plot(wx.Panel):
         text_panel.SetSizer(text_sizer)
         def when_clicked(ev):
           print(ev)
-          text_sizer.Add(wx.StaticText(text_panel, label="coucou"), 1)
-          text_sizer.Fit(text_panel)
+          text_sizer.Add(wx.StaticText(text_panel, label="coucou"), 0)
+          self.Layout()
         btn.Bind(wx.EVT_BUTTON, when_clicked)
         sizer.Add(text_panel, 1, wx.LEFT | wx.EXPAND)
         sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
