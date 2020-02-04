@@ -68,7 +68,7 @@ def demo():
       fig1.canvas.draw() ## important for refreshing the display
 
 
-    ## From https: // matplotlib.org / users / event_handling.html
+    ## From https://matplotlib.org/users /event_handling.html
     cid = fig1.canvas.mpl_connect('button_press_event', toggle_line) ## cid is an integer
     print("cid: " + str(cid))
 
