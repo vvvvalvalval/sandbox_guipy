@@ -3,12 +3,12 @@
 
 This consists of:
 
-- installing [Python 3.x](https://python.org/) runtime, 
+- installing a [Python 3.x](https://python.org/) runtime, 
 - installing the appropriate Python libraries ([SciPy](https://www.scipy.org/) and [WxPython](https://wxpython.org/))
 - downloading this code repository on your computer.
 - opening a Command Prompt at this repository.
 
-We propose detailed on how to do this on Windows, using the Anaconda distribution:
+We propose detailed instructions on how to do this on Windows, using the Anaconda distribution:
 
 
 ### With Anaconda on Windows
