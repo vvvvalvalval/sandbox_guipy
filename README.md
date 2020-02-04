@@ -18,7 +18,7 @@ Run the program by executing the command: `python app.py`
 
 You should see a window open, looking like the following:
 
-![](./img/demo_guipy.png)
+![](./demo_guipy.png)
 
 ## Install dependencies
 
