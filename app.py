@@ -115,7 +115,7 @@ class HelloFrame(wx.Frame):
 mean_fn = ku.constant_fn(0.5)
 kernel_fn = ku.kernel_Matern3_2_1D(1e1, 1e-1)
 kernel_params = (kernel_fn, mean_fn)
-noise_var_fn = ku.constant_fn(1e-2 ** 2)
+noise_var_fn = ku.constant_fn(1e-1 ** 2)
 
 
 def predictions(observed_data):
@@ -164,7 +164,7 @@ class GpPlot(wx.Panel):
     sizer = wx.BoxSizer(wx.VERTICAL)
     sizer.Add(self.canvas, 1, wx.EXPAND)
 
-    export_matlab_btn = wx.Button(self, -1, label="Export observed data as CSV")
+    export_csv_btn = wx.Button(self, -1, label="Export observed data as CSV")
 
     def export_csv(ev):
       with wx.FileDialog(self, "Save CSV file", wildcard="CSV files (*.csv)|*.csv",
@@ -180,8 +180,8 @@ class GpPlot(wx.Panel):
             export_observed_data_csv(file, self.gp_state.observed_data)
         except IOError:
           wx.LogError("Cannot save current data in file '%s'." % pathname)
-    export_matlab_btn.Bind(wx.EVT_BUTTON, export_csv)
-    sizer.Add(export_matlab_btn)
+    export_csv_btn.Bind(wx.EVT_BUTTON, export_csv)
+    sizer.Add(export_csv_btn, 0, wx.ALIGN_CENTER | wx.ALL)
 
     export_matlab_btn = wx.Button(self, -1, label="Export as Matlab file")
     def export_matlab(ev):
@@ -196,16 +196,16 @@ class GpPlot(wx.Panel):
         export_data_matlab(pathname, self.gp_state.observed_data, self.xs, self.predicted_means)
 
     export_matlab_btn.Bind(wx.EVT_BUTTON, export_matlab)
-    sizer.Add(export_matlab_btn)
+    sizer.Add(export_matlab_btn, 0, wx.ALIGN_CENTER | wx.ALL)
 
-    clear_button = wx.Button(self, -1, label="Reset")
+    reset_button = wx.Button(self, -1, label="Reset")
     def reset(ev):
       self.gp_state.initialize()
       self.refresh_plot()
-    clear_button.Bind(wx.EVT_BUTTON, reset)
-    sizer.Add(clear_button)
+    reset_button.Bind(wx.EVT_BUTTON, reset)
+    sizer.Add(reset_button, 0, wx.ALIGN_CENTER | wx.ALL)
 
-    sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
+    #sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
     self.SetSizer(sizer)
     self.refresh_plot()
 
