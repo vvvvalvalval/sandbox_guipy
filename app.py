@@ -158,8 +158,8 @@ class GpPlot(wx.Panel):
     self.gp_state = gp_state
     self.figure = mpl.figure.Figure(dpi=dpi, figsize=(4, 4))
     self.canvas = FigureCanvas(self, -1, self.figure)
-    self.toolbar = NavigationToolbar(self.canvas)
-    self.toolbar.Realize()
+    #self.toolbar = NavigationToolbar(self.canvas)
+    #self.toolbar.Realize()
 
     sizer = wx.BoxSizer(wx.VERTICAL)
     sizer.Add(self.canvas, 1, wx.EXPAND)
@@ -181,7 +181,6 @@ class GpPlot(wx.Panel):
         except IOError:
           wx.LogError("Cannot save current data in file '%s'." % pathname)
     export_csv_btn.Bind(wx.EVT_BUTTON, export_csv)
-    sizer.Add(export_csv_btn, 0, wx.ALIGN_CENTER | wx.ALL)
 
     export_matlab_btn = wx.Button(self, -1, label="Export as Matlab file")
     def export_matlab(ev):
@@ -194,26 +193,33 @@ class GpPlot(wx.Panel):
         # save the current contents in the file
         pathname = fileDialog.GetPath()
         export_data_matlab(pathname, self.gp_state.observed_data, self.xs, self.predicted_means)
-
     export_matlab_btn.Bind(wx.EVT_BUTTON, export_matlab)
-    sizer.Add(export_matlab_btn, 0, wx.ALIGN_CENTER | wx.ALL)
 
     reset_button = wx.Button(self, -1, label="Reset")
     def reset(ev):
       self.gp_state.initialize()
       self.refresh_plot()
     reset_button.Bind(wx.EVT_BUTTON, reset)
-    sizer.Add(reset_button, 0, wx.ALIGN_CENTER | wx.ALL)
 
-    #sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
     self.SetSizer(sizer)
     self.refresh_plot()
+
+    hsizer_btns = wx.BoxSizer(wx.HORIZONTAL)
+    hmargin_btns = 5
+    hsizer_btns.Add(export_csv_btn, 0, wx.ALL, hmargin_btns)
+    hsizer_btns.Add(export_matlab_btn, 0, wx.ALL, hmargin_btns)
+    hsizer_btns.Add((-1, -1), 1)
+    hsizer_btns.Add(reset_button, 0, wx.ALL, hmargin_btns)
+
+    sizer.Add(hsizer_btns, 0, wx.EXPAND | wx.ALL)
 
     def on_click_figure(ev):
       self.gp_state.add_observed(ev.xdata, ev.ydata)
       self.refresh_plot()
 
     _cid = self.figure.canvas.mpl_connect('button_press_event', on_click_figure)
+
+
 
   def refresh_plot(self):
     observed_data = self.gp_state.observed_data
