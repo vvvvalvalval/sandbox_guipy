@@ -66,7 +66,18 @@ static PyObject *
 Custom_next(MyCustomIterator *self, PyObject *Py_UNUSED(ignored))
 {
     if(self->cursor < self->end) {
-      PyObject * ret = PyLong_FromLong((long) self->cursor);
+      //PyObject * ret = PyLong_FromLong((long) self->cursor);
+
+      Py_ssize_t l = 5;
+      // PyList reference: https://docs.python.org/3.3/c-api/list.html?highlight=m
+      PyObject * elems = PyList_New(l);
+      for(Py_ssize_t i = 0; i < l; i++){
+        PyObject * e = PyLong_FromLong((long) self->cursor);
+        // https://stackoverflow.com/questions/10863669/lost-on-py-decref-incref-when-handling-pylist-append-in-python-c-extension
+        PyList_SetItem(elems, i, e);
+      }
+      // https://docs.python.org/3/extending/extending.html#building-arbitrary-values
+      PyObject * ret = Py_BuildValue("{s:s,s:O}", "event_type", "data_points", "elements", elems);
       self->cursor++;
       return ret;
     } else {
