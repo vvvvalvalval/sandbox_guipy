@@ -2,11 +2,14 @@
 #include <Python.h>
 #include "structmember.h"
 
+// https://docs.python.org/3/extending/extending.html
+
 typedef struct {
     PyObject_HEAD
     int start;
     int end;
     int cursor;
+    char content_hash;
 } MyCustomIterator;
 
 static void
@@ -24,6 +27,7 @@ Custom_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         self->start = 0;
         self->end = 0;
         self->cursor = 0;
+        self->content_hash = (char) 0;
     }
     return (PyObject *) self;
 }
@@ -47,18 +51,35 @@ static PyMemberDef Custom_members[] = {
      "Where the range starts, inclusive."},
     {"end", T_INT, offsetof(MyCustomIterator, end), 0,
      "Where the range ends, exclusive."},
+    {"content_hash", T_INT, offsetof(MyCustomIterator, content_hash), 0,
+     "A digest of the data supplied so far."},
     {NULL}  /* Sentinel */
 };
+
+static PyObject * Custom_addBytes(MyCustomIterator *self, PyObject *data){
+  // https://docs.python.org/3/c-api/bytes.html
+  if (!PyBytes_Check(data)){
+    return NULL;
+  }
+  Py_ssize_t l =  PyBytes_Size(data);
+  char * payload = PyBytes_AsString(data);
+  char hash = self->content_hash;
+  for(Py_ssize_t i = 0; i < l; i++){
+    hash = hash ^ payload[i];
+  }
+  self->content_hash = hash;
+  Py_RETURN_NONE
+}
 
 static PyObject *
 Custom_hasNext(MyCustomIterator *self, PyObject *Py_UNUSED(ignored))
 {
     if(self->cursor < self->end)
-    {
-      return Py_True;
+    { // https://docs.python.org/3/c-api/bool.html
+      Py_RETURN_TRUE
     } else
     {
-      return Py_False;
+      Py_RETURN_FALSE
     }
 }
 
@@ -77,7 +98,7 @@ Custom_next(MyCustomIterator *self, PyObject *Py_UNUSED(ignored))
         PyList_SetItem(elems, i, e);
       }
       // https://docs.python.org/3/extending/extending.html#building-arbitrary-values
-      PyObject * ret = Py_BuildValue("{s:s,s:O}", "event_type", "data_points", "elements", elems);
+      PyObject * ret = Py_BuildValue("{s:s,s:O,s:i}", "event_type", "data_points", "elements", elems, "content_hash", self->content_hash);
       self->cursor++;
       return ret;
     } else {
@@ -87,6 +108,9 @@ Custom_next(MyCustomIterator *self, PyObject *Py_UNUSED(ignored))
 }
 
 static PyMethodDef Custom_methods[] = {
+    {"add_bytes", (PyCFunction) Custom_addBytes, METH_O, // https://docs.python.org/3/c-api/structures.html
+     "Add data that modifies the state of the iterator."
+    },
     {"has_next", (PyCFunction) Custom_hasNext, METH_NOARGS,
      "Whether the iterator is exhausted."
     },
